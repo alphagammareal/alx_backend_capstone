@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="mb-4">Wallets</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Balance (GHS)</th>
+            <th>Currency</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for wallet in wallets %}
+        <tr>
+            <td>{{ wallet.name }}</td>
+            <td>{{ wallet.balance }}</td>
+            <td>{{ wallet.currency }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" class="text-center">No wallets found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<h2 class="mt-5">Wallet Balances</h2>
+<canvas id="walletChart" width="400" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const walletCtx = document.getElementById('walletChart').getContext('2d');
+
+const walletData = {
+    labels: [{% for wallet in wallets %}'{{ wallet.name }}',{% endfor %}],
+    datasets: [{
+        label: 'Wallet Balance (GHS)',
+        data: [{% for wallet in wallets %}{{ wallet.balance }},{% endfor %}],
+        backgroundColor: [
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)'
+        ],
+        borderColor: [
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)'
+        ],
+        borderWidth: 1
+    }]
+};
+
+const walletChart = new Chart(walletCtx, {
+    type: 'doughnut',
+    data: walletData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            title: {
+                display: true,
+                text: 'Wallet Balances Overview'
+            }
+        }
+    }
+});
+</script>
+
+{% endblock %}
