@@ -1,0 +1,37 @@
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+
+# Django
+*.sqlite3
+media/
+staticfiles/
+static/
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# VS Code / IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# MySQL dump files
+*.sql
+
+# Migrations cache (keep migrations, ignore cache)
+**/__pycache__/
+
+# Node (if frontend later)
+node_modules/
