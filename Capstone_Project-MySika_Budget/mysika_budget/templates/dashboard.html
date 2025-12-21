@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+
+<div class="row">
+    <!-- Wallet Summary -->
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Wallets</div>
+            <div class="card-body">
+                <h5 class="card-title">Total Balance: GHS {{ total_balance }}</h5>
+                <p class="card-text">{{ wallet_count }} wallets</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expenses / Income Summary -->
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Income vs Expense</div>
+            <div class="card-body">
+                <h5 class="card-title">Income: GHS {{ total_income }}</h5>
+                <h5 class="card-title">Expense: GHS {{ total_expense }}</h5>
+                <p class="card-text">Net: GHS {{ net_balance }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investment Summary -->
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-header">Investments</div>
+            <div class="card-body">
+                <h5 class="card-title">Portfolio Value: GHS {{ total_portfolio_value }}</h5>
+                <p class="card-text">{{ investment_count }} stocks tracked</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
