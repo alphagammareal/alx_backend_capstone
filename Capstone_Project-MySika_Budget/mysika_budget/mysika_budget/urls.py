@@ -23,4 +23,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('api/auth/', include ('wallets.urls')),
     path('api/budgets/', include('budgets.urls')),
+    path('api/categories/', include('categories.urls')),
+    path('api/transactions/', include('transactions.urls')),
+    path("api/analytics/", include("analytics.urls")),
 ]

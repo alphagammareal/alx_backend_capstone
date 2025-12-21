@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+from decouple import config
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'transactions',
     'investments',
     'analytics',
+    'budgets',
     'rest_framework_simplejwt',
 ]
 
@@ -147,3 +148,4 @@ REST_FRAMEWORK = {
     )
 }
 
+ALPHA_VANTAGE_API_KEY = config("ALPHA_VANTAGE_API_KEY")
