@@ -13,18 +13,14 @@ class Transaction(models.Model):
         ("INCOME", "Income"),
         ("EXPENSE", "Expense"),
     ]
-    
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="transactions"
     )
+    Wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name= "wallet_transactions")
 
-    wallet = models.ForeignKey(
-        Wallet,
-        on_delete=models.CASCADE,
-        related_name="transactions"
-    )
 
     category = models.ForeignKey(
         Category,
