@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Add Transaction{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 600px;">
+    <h2 class="mb-4 text-center">Add New Transaction</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="transaction_type" class="form-label">Type</label>
+            <select name="transaction_type" id="transaction_type" class="form-select" required>
+                <option value="" disabled selected>Select type</option>
+                <option value="INCOME">Income</option>
+                <option value="EXPENSE">Expense</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="amount" class="form-label">Amount (GHS)</label>
+            <div class="input-group">
+                <span class="input-group-text">₵</span>
+                <input type="number" step="0.01" min="0.01" name="amount" id="amount" 
+                       class="form-control" placeholder="0.00" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select name="category" id="category" class="form-select" required>
+                <option value="" disabled selected>Choose category</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% empty %}
+                    <option value="" disabled>No categories available</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        {% if not has_categories %}
+            <div class="alert alert-info">
+                <strong>Tip:</strong> You don't have any categories yet. 
+                You can still add this transaction and create categories later from the menu.
+                <!-- Remove the link until you create add_category view -->
+            </div>
+        {% endif %}
+
+        <div class="mb-4">
+            <label for="description" class="form-label">Description (optional)</label>
+            <textarea name="description" id="description" class="form-control" rows="3" 
+                      placeholder="e.g. Salary, Groceries, etc."></textarea>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="{% url 'transactions' %}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+            <button type="submit" class="btn btn-success btn-lg">Add Transaction</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-5 text-center display-5">Analytics - Expenses by Category</h2>
+
+    {% if has_data %}
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5">
+                        <div style="position: relative; height: 500px;">
+                            <canvas id="analyticsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center py-5 my-5">
+            <div class="p-5 bg-light rounded-3">
+                <h3 class="display-6 text-muted mb-4">No expenses recorded yet</h3>
+                <p class="lead text-muted mb-4">
+                    Start tracking your spending to unlock powerful insights and beautiful charts.
+                </p>
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="{% url 'add_transaction' %}" class="btn btn-success btn-lg px-5">
+                        Add Your First Expense
+                    </a>
+                    <a href="/transactions/" class="btn btn-outline-secondary btn-lg">
+                        View Transactions
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% if has_data %}
+<script>
+    const expenseData = {{ expense_data_json|safe }};
+
+    // Beautiful color palette
+    const colors = [
+        '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b',
+        '#eb4d4b', '#6ab04c', '#c44569', '#30336b', '#130f40'
+    ];
+
+    const backgroundColors = colors.slice(0, expenseData.length);
+    const borderColors = backgroundColors.map(c => c + 'dd');  // slightly transparent border
+
+    const ctx = document.getElementById('analyticsChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: expenseData.map(item => item.category),
+            datasets: [{
+                data: expenseData.map(item => item.total),
+                backgroundColor: backgroundColors,
+                borderColor: '#fff',
+                borderWidth: 3,
+                hoverBorderWidth: 4,
+                hoverOffset: 15
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        padding: 20,
+                        font: { size: 14 },
+                        usePointStyle: true
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Total Expenses by Category (GHS)',
+                    font: { size: 18 },
+                    padding: 20
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: GHS ${value.toLocaleString()} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

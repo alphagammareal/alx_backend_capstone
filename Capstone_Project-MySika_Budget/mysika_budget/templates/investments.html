@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Investments{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4 text-center">Your Investments</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Stock</th>
+                <th>Quantity</th>
+                <th>Latest Price</th>
+                <th>Current Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inv in investments %}
+            <tr>
+                <td>{{ inv.stock.symbol }}</td>
+                <td>{{ inv.quantity }}</td>
+                <td>
+                    {% if inv.stock.prices.first %}
+                        ${{ inv.stock.prices.first.price }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>
+                    {% if inv.stock.prices.first %}
+                        ${{ inv.quantity|floatformat:2|floatformat:""|add:"*"|add:inv.stock.prices.first.price }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No investments found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
