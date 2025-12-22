@@ -1,41 +1,105 @@
 {% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Dashboard</h1>
+<div class="container">
+    <h2 class="mb-4 text-center">Dashboard</h2>
 
-<div class="row">
-    <!-- Wallet Summary -->
-    <div class="col-md-4">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-header">Wallets</div>
-            <div class="card-body">
-                <h5 class="card-title">Total Balance: GHS {{ total_balance }}</h5>
-                <p class="card-text">{{ wallet_count }} wallets</p>
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5>Total Balance</h5>
+                    <h3>${{ total_balance }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5>Net Balance</h5>
+                    <h3>${{ net_balance }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5>Total Income</h5>
+                    <h3>${{ total_income }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h5>Total Expenses</h5>
+                    <h3>${{ total_expense }}</h3>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Expenses / Income Summary -->
-    <div class="col-md-4">
-        <div class="card text-white bg-warning mb-3">
-            <div class="card-header">Income vs Expense</div>
-            <div class="card-body">
-                <h5 class="card-title">Income: GHS {{ total_income }}</h5>
-                <h5 class="card-title">Expense: GHS {{ total_expense }}</h5>
-                <p class="card-text">Net: GHS {{ net_balance }}</p>
-            </div>
+    <!-- Charts -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <canvas id="walletsChart"></canvas>
         </div>
-    </div>
-
-    <!-- Investment Summary -->
-    <div class="col-md-4">
-        <div class="card text-white bg-info mb-3">
-            <div class="card-header">Investments</div>
-            <div class="card-body">
-                <h5 class="card-title">Portfolio Value: GHS {{ total_portfolio_value }}</h5>
-                <p class="card-text">{{ investment_count }} stocks tracked</p>
-            </div>
+        <div class="col-md-6 mb-4">
+            <canvas id="expensesChart"></canvas>
+        </div>
+        <div class="col-md-6 mb-4">
+            <canvas id="investmentsChart"></canvas>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Wallet Balances Chart
+    const walletsCtx = document.getElementById('walletsChart').getContext('2d');
+    new Chart(walletsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ wallet_labels|safe }},
+            datasets: [{
+                label: 'Wallet Balances',
+                data: {{ wallet_values|safe }},
+                backgroundColor: ['#007bff','#28a745','#ffc107','#dc3545','#6c757d'],
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    // Expense by Category Chart
+    const expenseCtx = document.getElementById('expensesChart').getContext('2d');
+    new Chart(expenseCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ category_labels|safe }},
+            datasets: [{
+                label: 'Expenses by Category',
+                data: {{ category_values|safe }},
+                backgroundColor: '#dc3545'
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    // Investments Chart
+    const investmentsCtx = document.getElementById('investmentsChart').getContext('2d');
+    new Chart(investmentsCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ investment_labels|safe }},
+            datasets: [{
+                label: 'Investments',
+                data: {{ investment_values|safe }},
+                backgroundColor: ['#007bff','#28a745','#ffc107','#dc3545','#6c757d'],
+            }]
+        },
+        options: { responsive: true }
+    });
+</script>
 {% endblock %}
