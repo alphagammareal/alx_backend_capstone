@@ -10,7 +10,7 @@ class DefaultCategory(models.Model):
         ("EXPENSE", "Expense"),
     ]
 
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=False)
     category_type = models.CharField(
         max_length=10,
         choices=CATEGORY_TYPE_CHOICES
@@ -34,6 +34,8 @@ class Category(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
         related_name="categories"
     )
     name = models.CharField(max_length=100)
