@@ -1,5 +1,3 @@
-# frontend/views.py - FINAL CORRECTED VERSION
-
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -10,30 +8,30 @@ import json
 
 from wallets.models import Wallet
 from transactions.models import Transaction
-from categories.models import Category
+from categories.models import Category, DefaultCategory
 from budgets.models import Budget
-from investments.models import Investment
+from investments.models import Investment, Stock
+from investments.services import MarketDataService
 
 
 @login_required
 def dashboard(request):
     user = request.user
 
-    # Wallet summary (single wallet per user)
+    # Wallet summary
     wallet, created = Wallet.objects.get_or_create(user=user)
     total_balance = float(wallet.balance)
 
-    # All transactions for this user (linked directly via user field)
+    # Transactions
     transactions = Transaction.objects.filter(user=user)
 
-    # Income & Expense totals
     total_income = transactions.filter(transaction_type='INCOME') \
                               .aggregate(total=Sum('amount'))['total'] or 0
     total_expense = transactions.filter(transaction_type='EXPENSE') \
                                .aggregate(total=Sum('amount'))['total'] or 0
     net_balance = total_income - total_expense
 
-    # Expense by category
+    # Expense by category for chart
     expense_by_category = transactions.filter(transaction_type='EXPENSE') \
                                      .values('category__name') \
                                      .annotate(total=Sum('amount')) \
@@ -42,18 +40,13 @@ def dashboard(request):
     category_labels = [item['category__name'] or 'Uncategorized' for item in expense_by_category]
     category_values = [float(item['total'] or 0) for item in expense_by_category]
 
-    # Investments summary
+    # Investments - now with live prices
     investments = Investment.objects.filter(user=user)
-    investment_labels = []
-    investment_values = []
+    total_portfolio_value = Decimal('0')
     for inv in investments:
-        investment_labels.append(inv.stock.symbol if hasattr(inv.stock, 'symbol') else 'Unknown')
-        latest_price = inv.stock.prices.first() if hasattr(inv.stock, 'prices') else None
-        if latest_price:
-            investment_values.append(float(inv.quantity * latest_price.price))
-        else:
-            investment_values.append(0)
-    total_portfolio_value = sum(investment_values)
+        MarketDataService.update_stock_price(inv.stock)  # Refresh price
+        latest_price = inv.stock.prices.first().price if inv.stock.prices.exists() else Decimal('0')
+        total_portfolio_value += latest_price * inv.quantity
 
     context = {
         'total_balance': total_balance,
@@ -62,9 +55,7 @@ def dashboard(request):
         'net_balance': net_balance,
         'category_labels': category_labels,
         'category_values': category_values,
-        'investment_labels': investment_labels,
-        'investment_values': investment_values,
-        'total_portfolio_value': total_portfolio_value,
+        'total_portfolio_value': float(total_portfolio_value),
         'year': datetime.now().year,
     }
 
@@ -79,8 +70,7 @@ def wallets_view(request):
 
 @login_required
 def transactions_view(request):
-    transactions = Transaction.objects.filter(user=request.user) \
-                                     .order_by('-created_at')
+    transactions = Transaction.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'transactions.html', {'transactions': transactions})
 
 
@@ -93,7 +83,27 @@ def budgets_view(request):
 @login_required
 def investments_view(request):
     investments = Investment.objects.filter(user=request.user)
-    return render(request, 'investments.html', {'investments': investments})
+
+    # Update prices for all investments
+    for inv in investments:
+        MarketDataService.update_stock_price(inv.stock)
+
+    # Prepare detailed data
+    investment_data = []
+    for inv in investments:
+        current_price = inv.stock.prices.first().price if inv.stock.prices.exists() else None
+        data = {
+            'stock': inv.stock,
+            'quantity': inv.quantity,
+            'average_buy_price': inv.average_buy_price,
+            'cost_basis': inv.quantity * inv.average_buy_price,
+            'current_price': current_price,
+            'current_value': current_price * inv.quantity if current_price else None,
+            'profit_loss': (current_price * inv.quantity - inv.quantity * inv.average_buy_price) if current_price else None,
+        }
+        investment_data.append(data)
+
+    return render(request, 'investments.html', {'investment_data': investment_data})
 
 
 @login_required
@@ -125,22 +135,34 @@ def add_transaction_view(request):
     if request.method == "POST":
         amount_str = request.POST.get("amount")
         transaction_type = request.POST.get("transaction_type")
-        category_id = request.POST.get("category")
+        category_input = request.POST.get("category")  # now handles default/user
         description = request.POST.get("description", "")
 
         try:
             amount = float(amount_str)
             if amount <= 0:
                 messages.error(request, "Amount must be greater than zero.")
-                raise ValueError("Invalid amount")
+                raise ValueError()
 
-            # Get user's wallet
             wallet = Wallet.objects.get(user=request.user)
 
-            # Get category (must belong to user)
-            category = Category.objects.get(id=category_id, user=request.user)
+            # Handle category selection
+            if category_input.startswith("default_"):
+                cat_id = category_input.split("_")[1]
+                default_cat = DefaultCategory.objects.get(id=cat_id)
+                # Copy to user categories
+                category, created = Category.objects.get_or_create(
+                    user=request.user,
+                    name=default_cat.name,
+                    category_type=default_cat.category_type
+                )
+            elif category_input.startswith("user_"):
+                cat_id = category_input.split("_")[1]
+                category = Category.objects.get(id=cat_id, user=request.user)
+            else:
+                messages.error(request, "Invalid category.")
+                raise ValueError()
 
-            # Create transaction - linked to USER, not wallet
             Transaction.objects.create(
                 user=request.user,
                 amount=amount,
@@ -149,7 +171,7 @@ def add_transaction_view(request):
                 description=description
             )
 
-            # Manually update wallet balance
+            # Update balance
             if transaction_type == "INCOME":
                 wallet.balance += Decimal(str(amount))
             elif transaction_type == "EXPENSE":
@@ -160,16 +182,56 @@ def add_transaction_view(request):
             return redirect("transactions")
 
         except ValueError:
-            pass  # Message already shown
-        except Category.DoesNotExist:
+            pass
+        except (DefaultCategory.DoesNotExist, Category.DoesNotExist):
             messages.error(request, "Invalid category selected.")
-        except Exception as e:
-            messages.error(request, "Error adding transaction. Please try again.")
+        except Exception:
+            messages.error(request, "Error adding transaction.")
 
-    # GET request - show form
-    categories = Category.objects.filter(user=request.user)
+    # GET - show form with default + user categories
+    default_categories = DefaultCategory.objects.all()
+    user_categories = Category.objects.filter(user=request.user)
+    all_categories = list(default_categories) + list(user_categories)
+    all_categories.sort(key=lambda c: c.name.lower())
+
     context = {
-        "categories": categories,
-        "has_categories": categories.exists()
+        "categories": all_categories,
+        "has_categories": len(all_categories) > 0
     }
     return render(request, "add_transaction.html", context)
+
+
+@login_required
+def add_investment_view(request):
+    if request.method == "POST":
+        symbol = request.POST.get("symbol", "").strip().upper()
+        market = request.POST.get("market")
+        quantity_str = request.POST.get("quantity")
+        buy_price_str = request.POST.get("buy_price")
+
+        try:
+            quantity = Decimal(quantity_str)
+            buy_price = Decimal(buy_price_str)
+
+            if not symbol or not market or quantity <= 0 or buy_price <= 0:
+                messages.error(request, "All fields are required and must be positive.")
+            else:
+                stock, _ = Stock.objects.get_or_create(
+                    symbol=symbol,
+                    market=market,
+                    defaults={'name': symbol}
+                )
+
+                Investment.objects.create(
+                    user=request.user,
+                    stock=stock,
+                    quantity=quantity,
+                    average_buy_price=buy_price
+                )
+
+                messages.success(request, "Investment added successfully!")
+                return redirect("investments")
+        except (ValueError, Decimal.InvalidOperation):
+            messages.error(request, "Invalid number format.")
+
+    return render(request, "add_investment.html")
