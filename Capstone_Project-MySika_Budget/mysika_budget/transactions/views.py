@@ -69,7 +69,7 @@ class TransactionCreateView(LoginRequiredMixin, CreateView):
     """
     model = Transaction
     form_class = TransactionForm
-    template_name = "transactions/transaction_form.html"
+    template_name = "transactions/add.html"
     success_url = reverse_lazy("transaction-list")
 
     def get_form_kwargs(self):
