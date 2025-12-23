@@ -2,43 +2,96 @@
 {% block title %}Investments{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2 class="mb-4 text-center">Your Investments</h2>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Stock</th>
-                <th>Quantity</th>
-                <th>Latest Price</th>
-                <th>Current Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for inv in investments %}
-            <tr>
-                <td>{{ inv.stock.symbol }}</td>
-                <td>{{ inv.quantity }}</td>
-                <td>
-                    {% if inv.stock.prices.first %}
-                        ${{ inv.stock.prices.first.price }}
-                    {% else %}
-                        N/A
-                    {% endif %}
-                </td>
-                <td>
-                    {% if inv.stock.prices.first %}
-                        ${{ inv.quantity|floatformat:2|floatformat:""|add:"*"|add:inv.stock.prices.first.price }}
-                    {% else %}
-                        0
-                    {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" class="text-center">No investments found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Your Investments</h2>
+        <a href="{% url 'add_investment' %}" class="btn btn-success btn-lg">
+            + Add Investment
+        </a>
+    </div>
+
+    {% if investment_data %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Stock</th>
+                        <th>Market</th>
+                        <th>Quantity</th>
+                        <th>Avg Buy Price</th>
+                        <th>Cost Basis</th>
+                        <th>Current Price</th>
+                        <th>Current Value</th>
+                        <th>Profit / Loss</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in investment_data %}
+                    <tr>
+                        <td>
+                            <strong>{{ data.stock.symbol }}</strong><br>
+                            <small class="text-muted">{{ data.stock.name }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ data.stock.market }}</span>
+                        </td>
+                        <td>{{ data.quantity|floatformat:4 }}</td>
+                        <td>₵{{ data.average_buy_price|floatformat:2 }}</td>
+                        <td>₵{{ data.cost_basis|floatformat:2 }}</td>
+                        <td>
+                            {% if data.current_price %}
+                                ₵{{ data.current_price|floatformat:2 }}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if data.current_value %}
+                                <strong>₵{{ data.current_value|floatformat:2 }}</strong>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td class="{% if data.profit_loss > 0 %}text-success{% elif data.profit_loss < 0 %}text-danger{% else %}text-muted{% endif %} fw-bold">
+                            {% if data.profit_loss is not None %}
+                                {% if data.profit_loss > 0 %} + {% endif %}
+                                ₵{{ data.profit_loss|floatformat:2 }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-light">
+                    <tr>
+                        <td colspan="6" class="text-end fw-bold">Total Portfolio Value:</td>
+                        <td colspan="2" class="fw-bold text-primary">
+                            {% with total=0 %}
+                                {% for data in investment_data %}
+                                    {% if data.current_value %}
+                                        {% with total=total|add:data.current_value %}{% endwith %}
+                                    {% endif %}
+                                {% endfor %}
+                                ₵{{ total|floatformat:2 }}
+                            {% endwith %}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5 my-5">
+            <div class="p-5 bg-light rounded-3 shadow-sm">
+                <h3 class="text-muted mb-4">No investments yet</h3>
+                <p class="lead text-muted mb-4">
+                    Start building your portfolio by adding stocks from the US or Ghana Stock Exchange.
+                </p>
+                <a href="{% url 'add_investment' %}" class="btn btn-success btn-lg px-5">
+                    Add Your First Investment
+                </a>
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
