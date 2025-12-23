@@ -1,27 +1,24 @@
 {% extends 'base.html' %}
+{% block title %}Budgets{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Budgets</h1>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Category</th>
-            <th>Amount</th>
-            <th>Period</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="container">
+    <h2 class="mb-4 text-center">Your Budgets</h2>
+    <div class="row">
         {% for budget in budgets %}
-        <tr class="{% if budget.status == 'EXCEEDED' %}table-danger{% elif budget.status == 'ACTIVE' %}table-warning{% else %}table-success{% endif %}">
-            <td>{{ budget.category.name }}</td>
-            <td>{{ budget.amount }}</td>
-            <td>{{ budget.start_date }} to {{ budget.end_date }}</td>
-            <td>{{ budget.status }}</td>
-        </tr>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ budget.name }}</h5>
+                    <p class="card-text">Amount: ${{ budget.amount }}</p>
+                    <p class="card-text">Spent: ${{ budget.spent }}</p>
+                    <p class="card-text">Remaining: ${{ budget.amount|floatformat:2|add:"-"|add:budget.spent }}</p>
+                </div>
+            </div>
+        </div>
         {% empty %}
-        <tr><td colspan="4" class="text-center">No budgets set</td></tr>
+            <p class="text-center">No budgets found.</p>
         {% endfor %}
-    </tbody>
-</table>
+    </div>
+</div>
 {% endblock %}
