@@ -5,7 +5,6 @@ MySika Budget is a Django-powered personal finance management and investment tra
 Built as an ALX Backend Final Capstone Project, MySika Budget demonstrates modern backend engineering using:
 Python & Django
 Django REST Framework (DRF)
-JWT/Token Authentication
 External financial APIs for stock/market data
 
  Core Features
@@ -22,7 +21,7 @@ Create and monitor savings projects with milestone tracking.
 Fetch stock prices from GSE and US markets using external APIs.
 
 5. User Accounts & Authentication
-Secure login, registration, and token-based authentication.
+Secure login, registration, 
 
 Reports & Analytics
 Summaries, breakdowns, and insights to guide better financial decisions.
