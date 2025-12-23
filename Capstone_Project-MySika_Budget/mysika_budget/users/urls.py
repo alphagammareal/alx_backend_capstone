@@ -1,15 +1,11 @@
 from django.urls import path
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView
-)
-from .views import RegisterView, ProfileView
+from .views import login_view, register_view, profile_view, logout_view
+
+app_name = "users" 
 
 urlpatterns = [
-    path('register/', RegisterView.as_view(), name='register'),
-    # JWT Login
-    path('login/', TokenObtainPairView.as_view(), name='jwt-login'),
-    path('refresh/', TokenRefreshView.as_view(), name='jwt-refresh'),
-    # Profile
-    path('profile/', ProfileView.as_view(), name='profile'),
+    path('login/', login_view, name='login'),
+    path('register/', register_view, name='register'),
+    path('profile/', profile_view, name='profile'),
+    path('logout/', logout_view, name='logout'),
 ]

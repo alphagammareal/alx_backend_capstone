@@ -6,13 +6,15 @@ import uuid
 # Create your models here.
 
 # Custom User manager
+# users/models.py
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError("Email field is required")
 
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+        user = self.model(email=email, **extra_fields) 
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -20,6 +22,7 @@ class UserManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
 
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Superuser must have is_staff=True")
@@ -31,7 +34,7 @@ class UserManager(BaseUserManager):
 # Custom User Model
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
-    full_name = models.CharField(max_length=255, blank=True)
+    full_name = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
@@ -40,7 +43,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ['full_name']  
+    full_name = models.CharField(max_length=255) 
+    REQUIRED_FIELDS = []
 
     objects = UserManager()
 
