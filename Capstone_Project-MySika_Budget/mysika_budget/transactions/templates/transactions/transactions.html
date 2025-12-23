@@ -1,32 +1,36 @@
 {% extends 'base.html' %}
+{% block title %}Transactions{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Transactions</h1>
-
-<table class="table table-bordered table-hover">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Wallet</th>
-            <th>Category</th>
-            <th>Type</th>
-            <th>Amount</th>
-            <th>Description</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for txn in transactions %}
-        <tr class="{% if txn.transaction_type == 'EXPENSE' %}table-danger{% else %}table-success{% endif %}">
-            <td>{{ txn.created_at|date:"Y-m-d H:i" }}</td>
-            <td>{{ txn.wallet.name }}</td>
-            <td>{{ txn.category.name }}</td>
-            <td>{{ txn.transaction_type }}</td>
-            <td>{{ txn.amount }}</td>
-            <td>{{ txn.description }}</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="6" class="text-center">No transactions found</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container">
+    <h2 class="mb-4 text-center">Your Transactions</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Wallet</th>
+                <th>Amount</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.created_at|date:"Y-m-d H:i" }}</td>
+                <td>{{ transaction.transaction_type }}</td>
+                <td>{{ transaction.category.name }}</td>
+                <td>{{ transaction.wallet.name }}</td>
+                <td>${{ transaction.amount }}</td>
+                <td>{{ transaction.description }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No transactions found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
