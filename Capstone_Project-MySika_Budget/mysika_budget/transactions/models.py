@@ -67,3 +67,10 @@ class Transaction(models.Model):
             self.wallet.balance -= self.amount
 
         self.wallet.save(update_fields=["balance"])
+    
+    def save(self, *args, **kwargs):
+        """
+        Override save to apply wallet changes AFTER the transaction is saved.
+        """
+        super().save(*args, **kwargs)  # Save transaction first
+        self.apply_to_wallet()        # Then update wallet balance
