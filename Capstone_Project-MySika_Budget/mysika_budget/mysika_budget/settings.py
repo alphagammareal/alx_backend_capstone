@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'analytics',
     'budgets',
     'rest_framework_simplejwt',
+    'frontend',
 ]
 
 MIDDLEWARE = [
@@ -77,9 +78,7 @@ TEMPLATES = [
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 WSGI_APPLICATION = 'mysika_budget.wsgi.application'
 
@@ -155,3 +154,12 @@ REST_FRAMEWORK = {
 }
 
 ALPHA_VANTAGE_API_KEY = config("ALPHA_VANTAGE_API_KEY")
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'
+
+
+AUTHENTICATION_BACKENDS = [
+    'users.backends.EmailBackend',
+]
