@@ -26,29 +26,36 @@ class MarketDataService:
             return None
 
     @staticmethod
+    @staticmethod
     def fetch_gse_prices():
         url = "https://afx.kwayisi.org/gse/"
         response = requests.get(url)
         if response.status_code != 200:
             return {}
 
-        soup = BeautifulSoup(response.text, 'html.parser')
-        table = soup.find('table')
-        if not table:
-            return {}
-
+        text = response.text
         stocks = {}
-        for row in table.find('tbody').find_all('tr'):
-            cells = row.find_all('td')
-            if len(cells) >= 4:
-                ticker = cells[0].text.strip()
-                price_str = cells[3].text.strip()
-                if price_str:
+
+        # Find the Markdown table section (starts after "Live share prices..." or similar)
+        lines = text.splitlines()
+        in_table = False
+        for line in lines:
+            line = line.strip()
+            if line.startswith('| Ticker |') or line.startswith('| Symbol |'): 
+                in_table = True
+                continue
+            if in_table and line.startswith('|'):
+                parts = [p.strip() for p in line.split('|') if p.strip()]
+                if len(parts) >= 4:
+                    ticker = parts[0].strip('*')  
+                    price_str = parts[3].replace(',', '')  
                     try:
                         price = Decimal(price_str)
-                        stocks[ticker] = price
-                    except ValueError:
+                        stocks[ticker.upper()] = price
+                    except (ValueError, IndexError):
                         pass
+            if in_table and not line:  # Empty line ends table
+                break
         return stocks
 
     @staticmethod
