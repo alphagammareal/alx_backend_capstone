@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mb-4">Add New Transaction</h1>
+
+<form method="post">
+    {% csrf_token %}
+    
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Please fix the errors below:</strong>
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="mb-3">
+        {{ form.transaction_type.label_tag }}
+        {{ form.transaction_type }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.amount.label_tag }}
+        {{ form.amount }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.category.label_tag }}
+        {{ form.category }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.description.label_tag }}
+        {{ form.description }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Transaction</button>
+    <a href="{% url 'transaction-list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

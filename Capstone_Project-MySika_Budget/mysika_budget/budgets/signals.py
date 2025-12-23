@@ -5,6 +5,8 @@ from django.utils import timezone
 from django.conf import settings
 from .models import Budget
 from decimal import Decimal
+from django.db import models
+from django.db.models import Sum
 
 # Try to import the transaction model; adapt path if your transactions app name differs.
 try:
@@ -20,7 +22,7 @@ def compute_budget_total(user, category, start_date, end_date):
     if Transaction is None:
         return Decimal("0.00")
 
-    qs = Transaction.objects.filter(user=user, category__iexact=category, created_at__date__gte=start_date, created_at__date__lte=end_date)
+    qs = Transaction.objects.filter(user=user, category=category, created_at__date__gte=start_date, created_at__date__lte=end_date)
     agg = qs.aggregate(total=Sum('amount'))
     total = agg.get('total') or Decimal("0.00")
     return total
@@ -42,7 +44,7 @@ if Transaction:
         category = instance.category
         # find budgets for this user/category where transaction date falls within the budget range
         tx_date = instance.created_at.date() if hasattr(instance, "created_at") else (instance.date if hasattr(instance, "date") else timezone.now().date())
-        budgets = Budget.objects.filter(user=user, category__iexact=category, start_date__lte=tx_date, end_date__gte=tx_date)
+        budgets = Budget.objects.filter(user=user, category=category, start_date__lte=tx_date, end_date__gte=tx_date)
         for b in budgets:
             new_total = compute_budget_total(b.user, b.category, b.start_date, b.end_date)
             Budget.objects.filter(pk=b.pk).update(total_spent=new_total, status=b.calculate_status())
@@ -53,7 +55,7 @@ if Transaction:
         user = instance.user
         category = instance.category
         tx_date = instance.created_at.date() if hasattr(instance, "created_at") else (instance.date if hasattr(instance, "date") else timezone.now().date())
-        budgets = Budget.objects.filter(user=user, category__iexact=category, start_date__lte=tx_date, end_date__gte=tx_date)
+        budgets = Budget.objects.filter(user=user, category=category, start_date__lte=tx_date, end_date__gte=tx_date)
         for b in budgets:
             new_total = compute_budget_total(b.user, b.category, b.start_date, b.end_date)
             Budget.objects.filter(pk=b.pk).update(total_spent=new_total, status=b.calculate_status())

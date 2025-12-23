@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>My Transactions</h1>
+<a href="{% url 'transaction-add' %}">Add Transaction</a>
+<ul>
+{% for tx in transactions %}
+    <li>{{ tx.created_at|date:"M d" }} - {{ tx.transaction_type }} - {{ tx.amount }} - {{ tx.category }}</li>
+{% empty %}
+    <li>No transactions yet.</li>
+{% endfor %}
+</ul>
+{% endblock %}
