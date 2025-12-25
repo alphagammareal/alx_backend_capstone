@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.urls import path, include
 from users.views import ProfileAPIView, LogoutAPIView
-from django.contrib.auth.views import LogoutView  # Good import
+from django.contrib.auth.views import LogoutView  
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # This fixes the admin logout perfectly!
+    
     path('admin/logout/', LogoutView.as_view(next_page='/login/')),
 
     # Users authentication at root
@@ -19,7 +19,7 @@ urlpatterns = [
     path('api/auth/profile/', ProfileAPIView.as_view(), name='api_profile'),
     path('api/auth/logout/', LogoutAPIView.as_view(), name='api_logout'),
 
-    # Your app APIs
+    # app APIs
     path('api/budgets/', include('budgets.urls')),
     path('api/categories/', include('categories.urls')),
     path('api/transactions/', include('transactions.urls')),
