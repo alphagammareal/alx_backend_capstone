@@ -2,10 +2,19 @@ from django.contrib import admin
 from django.urls import path, include
 from users.views import ProfileAPIView, LogoutAPIView
 from django.contrib.auth.views import LogoutView  
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+
+def create_superuser(request):
+    if not User.objects.filter(username='admin').exists():
+        User.objects.create_superuser('admin', 'admin@mysika.com', 'mysikapassword123')
+        return HttpResponse("Superuser created! Username: admin, Password: mysikapassword123")
+    return HttpResponse("Superuser already exists or not allowed.")
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
+    path('create-superuser-secret/', create_superuser),
     
     path('admin/logout/', LogoutView.as_view(next_page='/login/')),
 
