@@ -7,3 +7,4 @@ djangorestframework-simplejwt>=5.3
 python-decouple>=3.8
 dj-database-url>=2.1
 requests>=2.31
+beautifulsoup4>=4.12
