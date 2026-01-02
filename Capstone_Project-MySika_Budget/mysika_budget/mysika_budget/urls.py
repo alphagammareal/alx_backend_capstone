@@ -31,6 +31,9 @@ urlpatterns = [
     # Users authentication at root
     path('', include('users.urls', namespace='users')), 
 
+    path("budgets/", include("budgets.urls")),
+    
+
     # Frontend pages
     path('', include('frontend.urls')),
 

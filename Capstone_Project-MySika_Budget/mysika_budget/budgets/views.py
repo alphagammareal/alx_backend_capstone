@@ -7,6 +7,12 @@ from .serializers import BudgetSerializer
 from django.shortcuts import get_object_or_404
 from django.db.models import Sum
 from django.utils import timezone
+from django.views.generic import ListView, CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from .models import Budget
+from .forms import BudgetForm
+
 
 # Create your views here.
 class BudgetListCreateView(generics.ListCreateAPIView):
@@ -61,3 +67,26 @@ def budget_progress_view(request, pk):
         "end_date": budget.end_date,
     }
     return Response(data, status=status.HTTP_200_OK)
+
+class BudgetListHTMLView(LoginRequiredMixin, ListView):
+    model = Budget
+    template_name = "budgets/budget_list.html"
+    context_object_name = "budgets"
+
+    def get_queryset(self):
+        return Budget.objects.filter(user=self.request.user).select_related('category').order_by('-start_date')
+
+class BudgetCreateHTMLView(LoginRequiredMixin, CreateView):
+    model = Budget
+    form_class = BudgetForm
+    template_name = "budgets/budget_form.html"
+    success_url = reverse_lazy("budget-list-html")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)

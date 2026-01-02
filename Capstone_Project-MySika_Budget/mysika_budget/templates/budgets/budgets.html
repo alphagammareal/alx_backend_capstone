@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Budgets{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4 text-center">Your Budgets</h2>
+    <div class="row">
+        {% for budget in budgets %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ budget.name }}</h5>
+                    <p class="card-text">Amount: ${{ budget.amount }}</p>
+                    <p class="card-text">Spent: ${{ budget.spent }}</p>
+                    <p class="card-text">Remaining: ${{ budget.amount|floatformat:2|add:"-"|add:budget.spent }}</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <p class="text-center">No budgets found.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

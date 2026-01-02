@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Add Budget{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 600px;">
+    <h2 class="mb-4 text-center">Create New Budget</h2>
+
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Please fix the errors below:</strong>
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label">{{ form.category.label }}</label>
+            {{ form.category }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">{{ form.amount_limit.label }}</label>
+            <div class="input-group">
+                <span class="input-group-text">₵</span>
+                {{ form.amount_limit }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">{{ form.start_date.label }}</label>
+            {{ form.start_date }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">{{ form.end_date.label }}</label>
+            {{ form.end_date }}
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="{% url 'budget-list-html' %}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+            <button type="submit" class="btn btn-success btn-lg">Create Budget</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
