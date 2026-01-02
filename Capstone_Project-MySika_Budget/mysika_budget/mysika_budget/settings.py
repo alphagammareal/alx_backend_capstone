@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-wh5h!n3_6-4!ye9fcd_vmo*2p9p@wv9$0cte$a1)d_-abc9-v+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['mysika-budget.onrender.com', '.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
