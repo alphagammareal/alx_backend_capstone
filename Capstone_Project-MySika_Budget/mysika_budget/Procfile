@@ -1,0 +1,1 @@
+web: gunicorn mysika_budget.wsgi:application
