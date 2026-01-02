@@ -10,7 +10,7 @@ from budgets.models import Budget
 def recalculate_budgets(user, category, date):
     budgets = Budget.objects.filter(
         user=user,
-        category=category.name,
+        category=category,
         start_date__lte=date,
         end_date__gte=date
     )
